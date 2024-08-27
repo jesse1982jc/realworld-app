@@ -47,7 +47,7 @@ describe("Test with backend", () => {
     cy.intercept(
       "GET",
       "https://conduit-api.bondaracademy.com/api/articles/feed*",
-      { articles: [], articlesCount: 0 }
+      { articles: [], articlesCount: 0 } // 這是從瀏覽器: F12 > Network > Response 得知的
     );
     cy.intercept("GET", "https://conduit-api.bondaracademy.com/api/articles*", {
       fixture: "articles.json",
