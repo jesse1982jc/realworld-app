@@ -124,14 +124,14 @@ describe("Test with backend", () => {
     });
   });
 
-  it.only("delete a new article in a global feed", () => {
+  it("delete a new article in a global feed", () => {
     // 從 postman 請求 request
-    const userCredentials = {
-      user: {
-        email: "jcjchuhu2@gmail.com",
-        password: "abcd1234",
-      },
-    };
+    // const userCredentials = {
+    //   user: {
+    //     email: "jcjchuhu2@gmail.com",
+    //     password: "abcd1234",
+    //   },
+    // };
 
     const bodyRequest = {
       article: {
@@ -142,43 +142,35 @@ describe("Test with backend", () => {
       },
     };
 
-    cy.request(
-      "POST",
-      "https://conduit-api.bondaracademy.com/api/users/login",
-      userCredentials
-    )
-      .its("body")
-      .then((body) => {
-        const token = body.user.token;
-
-        cy.request({
-          url: "https://conduit-api.bondaracademy.com/api/articles/",
-          headers: { Authorization: "Token " + token },
-          method: "POST",
-          body: bodyRequest,
-        }).then((response) => {
-          expect(response.status).to.equal(201);
-        });
-
-        // 點擊 "Delete Article" 按鈕的動作
-        cy.contains("Global Feed").click();
-        cy.get(".preview-link").eq(0).click();
-        cy.get(".article-actions").contains("Delete Article").click();
-
-        // 驗證被刪除的文章，是否真的不存在文章列表的第一項裡
-        cy.request({
-          url: "https://conduit-api.bondaracademy.com/api/articles?limit=10&offset=0",
-          headers: { Authorization: "Token " + token },
-          method: "GET",
-        })
-          .its("body")
-          .then((body) => {
-            // console.log(body);
-            expect(body.articles[0].title).not.to.equal(
-              "Request from API (請求)"
-            );
-          });
+    cy.get("@token").then((token) => {
+      cy.request({
+        url: "https://conduit-api.bondaracademy.com/api/articles/",
+        headers: { Authorization: "Token " + token },
+        method: "POST",
+        body: bodyRequest,
+      }).then((response) => {
+        expect(response.status).to.equal(201);
       });
+
+      // 點擊 "Delete Article" 按鈕的動作
+      cy.contains("Global Feed").click();
+      cy.get(".preview-link").eq(0).click();
+      cy.get(".article-actions").contains("Delete Article").click();
+
+      // 驗證被刪除的文章，是否真的不存在文章列表的第一項裡
+      cy.request({
+        url: "https://conduit-api.bondaracademy.com/api/articles?limit=10&offset=0",
+        headers: { Authorization: "Token " + token },
+        method: "GET",
+      })
+        .its("body")
+        .then((body) => {
+          // console.log(body);
+          expect(body.articles[0].title).not.to.equal(
+            "Request from API (請求)"
+          );
+        });
+    });
   });
 });
 

@@ -25,8 +25,29 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 Cypress.Commands.add("loginToApplication", () => {
-  cy.visit("/login");
-  cy.get('input[placeholder="Email"]').type("jcjchuhu2@gmail.com");
-  cy.get('input[placeholder="Password"]').type("abcd1234");
-  cy.get("form").submit();
+  const userCredentials = {
+    user: {
+      email: "jcjchuhu2@gmail.com",
+      password: "abcd1234",
+    },
+  };
+
+  cy.request(
+    "POST",
+    "https://conduit-api.bondaracademy.com/api/users/login",
+    userCredentials
+  )
+    .its("body")
+    .then((body) => {
+      const token = body.user.token;
+
+      // 保存 token
+      cy.wrap(token).as("token");
+
+      cy.visit("/", {
+        onBeforeLoad(win) {
+          win.localStorage.setItem("jwtToken", token);
+        },
+      });
+    });
 });
